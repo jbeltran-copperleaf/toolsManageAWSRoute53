@@ -10,21 +10,20 @@
 # Getting Hosted Zones
 hostedzones="$(sudo aws route53 list-hosted-zones --query 'HostedZones[*].Id' --output text)"
 
-echo "Obtained the next hostedzones: ${hostedzones}"
+echo "Obtained the next hostedzones: "
+echo "${hostedzones}"
 
 # Getting the Type A Registers by Zone and Saving Them:
 #
+baseResulDirName="resultTypeARegisters_$(date +%Y%m%d_%H%M%Sh)"
+mkdir -p $baseResulDirName
 
 for tmpHostedId in $hostedzones
 do
  filteredHostId=${tmpHostedId/#\/hostedzone\/""}
  tmpFileName="listTypeARegisters_$filteredHostId.json"   
+ tmpFilePath="${baseResulDirName}/${tmpFileName}"
  echo "Getting Type A Registers for the Hosted Zone: ${tmpHostedId}"
- touch $tmpFileName
- sudo aws route53 list-resource-record-sets --hosted-zone-id $tmpHostedId  --query 'ResourceRecordSets[?Type==`A`]'.[Name,ResourceRecords[].Value] > $tmpFileName
+ sudo aws route53 list-resource-record-sets --hosted-zone-id $tmpHostedId  --query 'ResourceRecordSets[?Type==`A`]'.[Name,ResourceRecords[].Value] > "${tmpFilePath}"
 
 done
-
-
-
-
